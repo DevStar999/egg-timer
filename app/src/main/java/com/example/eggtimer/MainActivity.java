@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         Duration d = Duration.ofMillis(millis);
         long minutes = d.toMinutes();
         long seconds = (d.toMillis()/1000L)%60L;
-        return String.format("%02d", minutes) + ":" + String.format("%02d", seconds);
+        return String.format("%02d:%02d", minutes, seconds);
     }
 
     public void triggerEggTimer(View view) {
