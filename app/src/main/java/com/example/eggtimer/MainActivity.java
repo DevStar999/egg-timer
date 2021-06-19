@@ -39,11 +39,11 @@ public class MainActivity extends AppCompatActivity {
         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.airhorn);
     }
 
-    private String convertMillisToTimerDisplay(long millis) {
-        Duration d = Duration.ofMillis(millis);
+    private void updateTimerDisplay(long timerDurationMillis) {
+        Duration d = Duration.ofMillis(timerDurationMillis);
         long minutes = d.toMinutes();
         long seconds = (d.toMillis()/1000L)%60L;
-        return String.format("%02d:%02d", minutes, seconds);
+        eggTimerDisplayTextView.setText(String.format("%02d:%02d", minutes, seconds));
     }
 
     public void triggerEggTimer(View view) {
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     // Keep changing the timer display in a Timely manner
-                    eggTimerDisplayTextView.setText(convertMillisToTimerDisplay(millisUntilFinished));
+                    updateTimerDisplay(millisUntilFinished);
                 }
                 @Override
                 public void onFinish() {
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             // Setting Timer display to default value
             eggTimerCurrentValueMillis = eggTimerDefaultValueMillis;
             eggTimerSeekBar.setProgress((int) eggTimerCurrentValueMillis);
-            eggTimerDisplayTextView.setText(convertMillisToTimerDisplay(eggTimerCurrentValueMillis));
+            updateTimerDisplay(eggTimerCurrentValueMillis);
 
             if (isResetTimerRequired) {
                 isResetTimerRequired = false; // Timer reset completed
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         // Initialise SeekBar to default value
         eggTimerSeekBar.setMax((int) eggTimerMaxValueMillis);
         eggTimerSeekBar.setProgress((int) eggTimerDefaultValueMillis);
-        eggTimerDisplayTextView.setText(convertMillisToTimerDisplay(eggTimerDefaultValueMillis));
+        updateTimerDisplay(eggTimerDefaultValueMillis);
 
         // Setting SeekBar onClickListener
         eggTimerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("SeekBar Changed", "progress = " + progress);
                 eggTimerCurrentValueMillis = progress;
                 eggTimerSeekBar.setProgress(progress);
-                eggTimerDisplayTextView.setText(convertMillisToTimerDisplay(eggTimerCurrentValueMillis));
+                updateTimerDisplay(eggTimerCurrentValueMillis);
             }
 
             @Override
