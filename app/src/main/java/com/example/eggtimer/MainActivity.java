@@ -2,20 +2,88 @@ package com.example.eggtimer;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.time.Duration;
+
 public class MainActivity extends AppCompatActivity {
+    // Views
     private SeekBar eggTimerSeekBar;
     private TextView eggTimerDisplayTextView;
-    private Button eggTimerTriggerButton;
+
+    // Variables
+    private long eggTimerDefaultValueMillis;
+    private long eggTimerCurrentValueMillis;
+    private long eggTimerMaxValueMillis;
+    private boolean isTimerOngoing;
+    private boolean isResetTimerRequired;
+    private MediaPlayer mediaPlayer;
+    private CountDownTimer countDownTimer;
 
     private void initialise() {
         eggTimerSeekBar = findViewById(R.id.eggTimerSeekBar);
         eggTimerDisplayTextView = findViewById(R.id.eggTimerDisplayTextView);
-        eggTimerTriggerButton = findViewById(R.id.eggTimerTriggerButton);
+
+        eggTimerDefaultValueMillis = 30*1000; // 30 seconds
+        eggTimerCurrentValueMillis = eggTimerDefaultValueMillis;
+        eggTimerMaxValueMillis = 10*60*1000; // 10 minutes
+        isTimerOngoing = false;
+        isResetTimerRequired = false;
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.airhorn);
+    }
+
+    private String convertMillisToTimerDisplay(long millis) {
+        Duration d = Duration.ofMillis(millis);
+        long minutes = d.toMinutes();
+        long seconds = (d.toMillis()/1000L)%60L;
+        return String.format("%02d", minutes) + ":" + String.format("%02d", seconds);
+    }
+
+    public void triggerEggTimer(View view) {
+        if (!isTimerOngoing) { /* Timer yet to start, starts after this click */
+            ((Button) view).setText("Stop"); // After click, set button text to "Stop"
+            eggTimerSeekBar.setEnabled(false); // Disable the SeekBar
+            isTimerOngoing = true; // Since, now the Timer is on-going
+
+            countDownTimer = new CountDownTimer(eggTimerCurrentValueMillis, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    // Keep changing the timer display in a Timely manner
+                    eggTimerDisplayTextView.setText(convertMillisToTimerDisplay(millisUntilFinished));
+                }
+                @Override
+                public void onFinish() {
+                    mediaPlayer.start(); // Play horn after timer completed
+                    ((Button) view).setText("Set Timer");
+                    isResetTimerRequired = true; // SeekBar is still disabled, so reset is required
+                }
+            };
+            countDownTimer.start();
+        }
+        else { /* Timer is either (on-going) OR (was completed and reset is required) */
+            ((Button) view).setText("Go!"); // After click, set button text to "Go!"
+            eggTimerSeekBar.setEnabled(true); // Enable the SeekBar
+
+            // Setting Timer display to default value
+            eggTimerCurrentValueMillis = eggTimerDefaultValueMillis;
+            eggTimerSeekBar.setProgress((int) eggTimerCurrentValueMillis);
+            eggTimerDisplayTextView.setText(convertMillisToTimerDisplay(eggTimerCurrentValueMillis));
+
+            if (isResetTimerRequired) {
+                isResetTimerRequired = false; // Timer reset completed
+            }
+            else {
+                isTimerOngoing = false;
+                countDownTimer.cancel();
+            }
+        }
     }
 
     @Override
@@ -23,6 +91,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Initialise views and variables
         initialise();
+
+        // Initialise SeekBar to default value
+        eggTimerSeekBar.setMax((int) eggTimerMaxValueMillis);
+        eggTimerSeekBar.setProgress((int) eggTimerDefaultValueMillis);
+        eggTimerDisplayTextView.setText(convertMillisToTimerDisplay(eggTimerDefaultValueMillis));
+
+        // Setting SeekBar onClickListener
+        eggTimerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.i("SeekBar Changed", "progress = " + progress);
+                eggTimerCurrentValueMillis = progress;
+                eggTimerSeekBar.setProgress(progress);
+                eggTimerDisplayTextView.setText(convertMillisToTimerDisplay(eggTimerCurrentValueMillis));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
 }
