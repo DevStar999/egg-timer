@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
 
     // Variables
     private long eggTimerDefaultValueMillis;
-    private long eggTimerCurrentValueMillis;
     private long eggTimerMaxValueMillis;
     private boolean isTimerOngoing;
     private boolean isResetTimerRequired;
@@ -32,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
         eggTimerDisplayTextView = findViewById(R.id.eggTimerDisplayTextView);
 
         eggTimerDefaultValueMillis = 30*1000; // 30 seconds
-        eggTimerCurrentValueMillis = eggTimerDefaultValueMillis;
         eggTimerMaxValueMillis = 10*60*1000; // 10 minutes
         isTimerOngoing = false;
         isResetTimerRequired = false;
@@ -52,7 +50,14 @@ public class MainActivity extends AppCompatActivity {
             eggTimerSeekBar.setEnabled(false); // Disable the SeekBar
             isTimerOngoing = true; // Since, now the Timer is on-going
 
-            countDownTimer = new CountDownTimer(eggTimerCurrentValueMillis, 1000) {
+            /*
+            If we are using the Offset value 100 milliseconds to compensate for the amount of value
+            lost in the 'progress' property of the SeekBar which is about 50-100 milliseconds or so.
+            This time is lost till the time control flow of the program reaches to the following line
+            where progress is SeekBar is accessed by - eggTimerSeekBar.getProgress()
+            */
+            countDownTimer = new CountDownTimer(eggTimerSeekBar.getProgress() + 100 /* Offset value */,
+                    1000) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     // Keep changing the timer display in a Timely manner
@@ -72,9 +77,8 @@ public class MainActivity extends AppCompatActivity {
             eggTimerSeekBar.setEnabled(true); // Enable the SeekBar
 
             // Setting Timer display to default value
-            eggTimerCurrentValueMillis = eggTimerDefaultValueMillis;
-            eggTimerSeekBar.setProgress((int) eggTimerCurrentValueMillis);
-            updateTimerDisplay(eggTimerCurrentValueMillis);
+            eggTimerSeekBar.setProgress((int) eggTimerDefaultValueMillis);
+            updateTimerDisplay(eggTimerDefaultValueMillis);
 
             if (isResetTimerRequired) {
                 isResetTimerRequired = false; // Timer reset completed
@@ -104,9 +108,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 Log.i("SeekBar Changed", "progress = " + progress);
-                eggTimerCurrentValueMillis = progress;
                 eggTimerSeekBar.setProgress(progress);
-                updateTimerDisplay(eggTimerCurrentValueMillis);
+                updateTimerDisplay((long) progress);
             }
 
             @Override
