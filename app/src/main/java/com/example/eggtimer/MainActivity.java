@@ -1,7 +1,5 @@
 package com.example.eggtimer;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -10,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.time.Duration;
 
@@ -30,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
         eggTimerSeekBar = findViewById(R.id.eggTimerSeekBar);
         eggTimerDisplayTextView = findViewById(R.id.eggTimerDisplayTextView);
 
-        eggTimerDefaultValueMillis = 30*1000; // 30 seconds
-        eggTimerMaxValueMillis = 10*60*1000; // 10 minutes
+        eggTimerDefaultValueMillis = 30 * 1000; // 30 seconds
+        eggTimerMaxValueMillis = 10 * 60 * 1000; // 10 minutes
         isTimerOngoing = false;
         isResetTimerRequired = false;
         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.airhorn);
@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private void updateTimerDisplay(long timerDurationMillis) {
         Duration d = Duration.ofMillis(timerDurationMillis);
         long minutes = d.toMinutes();
-        long seconds = (d.toMillis()/1000L)%60L;
+        long seconds = (d.toMillis() / 1000L) % 60L;
         eggTimerDisplayTextView.setText(String.format("%02d:%02d", minutes, seconds));
     }
 
@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
                     // Keep changing the timer display in a Timely manner
                     updateTimerDisplay(millisUntilFinished);
                 }
+
                 @Override
                 public void onFinish() {
                     mediaPlayer.start(); // Play horn after timer completed
@@ -71,8 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
             countDownTimer.start();
-        }
-        else { /* Timer is either (on-going) OR (was completed and reset is required) */
+        } else { /* Timer is either (on-going) OR (was completed and reset is required) */
             ((Button) view).setText("Go!"); // After click, set button text to "Go!"
             eggTimerSeekBar.setEnabled(true); // Enable the SeekBar
 
@@ -82,8 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (isResetTimerRequired) {
                 isResetTimerRequired = false; // Timer reset completed
-            }
-            else {
+            } else {
                 isTimerOngoing = false;
                 countDownTimer.cancel();
             }
@@ -113,9 +112,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
     }
 }
